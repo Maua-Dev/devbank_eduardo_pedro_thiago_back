@@ -9,10 +9,14 @@ from .enums.item_type_enum import ItemTypeEnum
 
 from .entities.item import Item
 
+from .entities.user import User
+
+from .repositories.user_repository_mock import UserRepositoryMock
 
 app = FastAPI()
 
 repo = Environments.get_item_repo()()
+user_repo = UserRepositoryMock()
 
 # a baixo estão as rotas da api
 # elas interagem com os métodos de repositório. por exemplo a rota create item chama, não exclusivamente,
@@ -141,6 +145,34 @@ def update_item(request: dict):
         "item": item_updated.to_dict()    
     }
     
+@app.get("/")
+def get_user_dashboard():
+    """
+    Rota inicial do DevBank Dashboard.
+    Retorna os dados da conta do usuário logado.
+    """
+    user = user_repo.get_user_account()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User Not found")
+    
+    return user.to_dict()
 
+
+@app.post("/items/withdraw")  
+def update_user_balance(request: dict):
+    """
+    Rota para atualizar o saldo do usuário (Depósito/Saque).
+    """
+    new_balance = request.get("new_balance")
+    if new_balance is None:
+        raise HTTPException(status_code=400, detail="New balance is required")
+    if type(new_balance) not in [int, float] or new_balance < 0:
+        raise HTTPException(status_code=400, detail="Invalid balance value")
+        
+    user_updated = user_repo.update_balance(float(new_balance))
+    if user_updated is None:
+        raise HTTPException(status_code=404, detail="User Not found")
+        
+    return user_updated.to_dict()
 
 handler = Mangum(app, lifespan="off")
