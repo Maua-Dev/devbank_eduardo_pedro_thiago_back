@@ -11,7 +11,7 @@ from .entities.item import Item
 
 from .entities.user import User
 
-from .repositories.user_repository_mock import UserRepositoryMock
+from .repo.user_repository_mock import UserRepositoryMock
 
 app = FastAPI()
 
