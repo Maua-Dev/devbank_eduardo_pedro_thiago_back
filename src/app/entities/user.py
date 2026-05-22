@@ -91,7 +91,7 @@ class User():
             return (False, "Account must be a string")
         
         # Regex breakdown: ^ (start), \d{5} (exactly 5 digits) and \d{1} (exactly 1 digit), - is '-' (char -), $ (end)
-        if re.match(r"^\d{5}-\d{1}$", account):
+        if not re.match(r"^\d{5}-\d{1}$", account):
             return (False, "Account must follow the XXXXX-X format")
         
         return (True, "") # No errors

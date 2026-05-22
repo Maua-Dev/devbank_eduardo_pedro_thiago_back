@@ -1,5 +1,5 @@
 import pytest
-from src.entities.user import User 
+from src.app.entities.user import User
 
 class TestUser:
     def test_deposit_success(self):
