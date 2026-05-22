@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 
@@ -158,21 +160,36 @@ def get_user_dashboard():
     return user.to_dict()
 
 
-@app.post("/items/withdraw")  
-def update_user_balance(request: dict):
-    """
-    Rota para atualizar o saldo do usuário (Depósito/Saque).
-    """
-    new_balance = request.get("new_balance")
-    if new_balance is None:
-        raise HTTPException(status_code=400, detail="New balance is required")
-    if type(new_balance) not in [int, float] or new_balance < 0:
-        raise HTTPException(status_code=400, detail="Invalid balance value")
-        
-    user_updated = user_repo.update_balance(float(new_balance))
-    if user_updated is None:
+class TransactionRequest(BaseModel):
+    amount: float
+
+@app.post("/withdraw")  
+def withdraw(request: TransactionRequest):
+    user = user_repo.get_user_account()
+    if user is None:
         raise HTTPException(status_code=404, detail="User Not found")
+    
+    old_balance = user.current_balance
+    
+    result = user.withdraw(request.amount)
+    
+    if user.current_balance == old_balance and request.amount > 0:
+        raise HTTPException(status_code=400, detail="Saldo insuficiente para realizar o saque")
         
-    return user_updated.to_dict()
+    user_repo.update_balance(user.current_balance)
+        
+    return result
+
+@app.post("/deposit")  
+def deposit(request: TransactionRequest):
+    user = user_repo.get_user_account()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User Not found")
+    
+    result = user.deposit(request.amount)
+    
+    user_repo.update_balance(user.current_balance)
+        
+    return result
 
 handler = Mangum(app, lifespan="off")
