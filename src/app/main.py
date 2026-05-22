@@ -24,6 +24,7 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 repo = Environments.get_item_repo()()
@@ -64,10 +65,10 @@ def get_user_dashboard():
         raise HTTPException(status_code=404, detail="User Not found")
     
     return {
-        "name": user.name,
-        "agency": user.agency,
-        "account": user.account,
-        "current_balance": user.current_balance
+        "name": str(user.name),
+        "agency": str(user.agency),
+        "account": str(user.account),
+        "current_balance": float(user.current_balance)
     }
 
 @app.post("/items/create_item", status_code=201)
