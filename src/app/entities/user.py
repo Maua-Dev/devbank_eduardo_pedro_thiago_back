@@ -117,6 +117,29 @@ class User():
             "current_balance": self.current_balance
         }
     
+    def deposit(self, deposit_amount: float) -> dict:
+        """
+        Deposit logic:
+        - Is the received amount greater than or equal to 0?
+        - If true, do current_balance += deposit_amount
+        """
+        if deposit_amount >= 0:
+            self.current_balance += deposit_amount
+            
+        return self.to_dict()
+
+    def withdraw(self, withdrawal_amount: float) -> dict:
+        """
+        Withdrawal logic:
+        - Is the received amount greater than or equal to 0?
+        - If current_balance > withdrawal_amount, do current_balance -= withdrawal_amount
+        """
+        if withdrawal_amount >= 0:
+            if self.current_balance > withdrawal_amount:
+                self.current_balance -= withdrawal_amount
+                
+        return self.to_dict()
+    
     def __eq__(self, other):
         """Defines the rules for comparing two User instances using the '==' operator."""
 
