@@ -91,7 +91,7 @@ class User():
             return (False, "Account must be a string")
         
         # Regex breakdown: ^ (start), \d{5} (exactly 5 digits) and \d{1} (exactly 1 digit), - is '-' (char -), $ (end)
-        if re.match(r"^\d{5}-\d{1}$", account):
+        if not re.match(r"^\d{5}-\d{1}$", account):
             return (False, "Account must follow the XXXXX-X format")
         
         return (True, "") # No errors
@@ -116,6 +116,29 @@ class User():
             "account": self.account,
             "current_balance": self.current_balance
         }
+    
+    def deposit(self, deposit_amount: float) -> dict:
+        """
+        Deposit logic:
+        - Is the received amount greater than or equal to 0?
+        - If true, do current_balance += deposit_amount
+        """
+        if deposit_amount >= 0:
+            self.current_balance += deposit_amount
+            
+        return self.to_dict()
+
+    def withdraw(self, withdrawal_amount: float) -> dict:
+        """
+        Withdrawal logic:
+        - Is the received amount greater than or equal to 0?
+        - If current_balance > withdrawal_amount, do current_balance -= withdrawal_amount
+        """
+        if withdrawal_amount >= 0:
+            if self.current_balance > withdrawal_amount:
+                self.current_balance -= withdrawal_amount
+                
+        return self.to_dict()
     
     def __eq__(self, other):
         """Defines the rules for comparing two User instances using the '==' operator."""
