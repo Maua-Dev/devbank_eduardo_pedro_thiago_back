@@ -56,6 +56,20 @@ def get_item(item_id: str):
         "item": item.to_dict()    
     }
 
+@app.get("/")
+def get_user_dashboard():
+    user = user_repo.get_user_account()
+    
+    if user is None:
+        raise HTTPException(status_code=404, detail="User Not found")
+    
+    return {
+        "name": user.name,
+        "agency": user.agency,
+        "account": user.account,
+        "current_balance": user.current_balance
+    }
+
 @app.post("/items/create_item", status_code=201)
 def create_item(request: dict):
     item_id = request.get("item_id")
