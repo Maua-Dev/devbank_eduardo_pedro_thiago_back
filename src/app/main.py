@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from .environments import Environments
@@ -17,15 +16,6 @@ from .entities.user import User
 from .repo.user_repository_mock import UserRepositoryMock
 
 app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"]
-)
 
 repo = Environments.get_item_repo()()
 user_repo = UserRepositoryMock()
