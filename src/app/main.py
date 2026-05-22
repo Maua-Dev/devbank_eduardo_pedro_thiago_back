@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from .environments import Environments
@@ -16,6 +17,14 @@ from .entities.user import User
 from .repo.user_repository_mock import UserRepositoryMock
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 repo = Environments.get_item_repo()()
 user_repo = UserRepositoryMock()
@@ -147,46 +156,39 @@ def update_item(request: dict):
         "item": item_updated.to_dict()    
     }
     
-@app.get("/")
-def get_user_dashboard():
-    """
-    Rota inicial do DevBank Dashboard.
-    Retorna os dados da conta do usuário logado.
-    """
+@app.post("/withdraw")  
+def withdraw(request: dict):
     user = user_repo.get_user_account()
     if user is None:
         raise HTTPException(status_code=404, detail="User Not found")
     
-    return user.to_dict()
-
-
-class TransactionRequest(BaseModel):
-    amount: float
-
-@app.post("/withdraw")  
-def withdraw(request: TransactionRequest):
-    user = user_repo.get_user_account()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User Not found")
+    total_amount = 0
+    for nota, quantidade in request.items():
+        total_amount += float(nota) * int(quantidade)
     
     old_balance = user.current_balance
     
-    result = user.withdraw(request.amount)
+    result = user.withdraw(total_amount)
     
-    if user.current_balance == old_balance and request.amount > 0:
+    if user.current_balance == old_balance and total_amount > 0:
         raise HTTPException(status_code=400, detail="Saldo insuficiente para realizar o saque")
-        
+    
     user_repo.update_balance(user.current_balance)
         
     return result
 
+
 @app.post("/deposit")  
-def deposit(request: TransactionRequest):
+def deposit(request: dict):
     user = user_repo.get_user_account()
     if user is None:
         raise HTTPException(status_code=404, detail="User Not found")
     
-    result = user.deposit(request.amount)
+    total_amount = 0
+    for nota, quantidade in request.items():
+        total_amount += float(nota) * int(quantidade)
+    
+    result = user.deposit(total_amount)
     
     user_repo.update_balance(user.current_balance)
         
