@@ -3,13 +3,16 @@ from ..entities.user import User
 
 class UserRepositoryMock:
     def __init__(self):
-        user = User.__new__(User)
-        user.name = "Eduardo"
-        user.agency = "0000"
-        user.account = "123456"
-        user.current_balance = 1000.0
+        self.user = User(
+            name = "Eduardo",
+            agency = "0000",
+            account = "12345-6",
+            current_balance = 1000.0
+        )
+
+        self.all_transaction = []
         
-        self.users: List[User] = [user]
+        self.users: List[User] = [self.user]
 
     def get_user_account(self) -> Optional[User]:
         if len(self.users) > 0:
@@ -22,3 +25,6 @@ class UserRepositoryMock:
             user.current_balance = new_balance
             return user
         return None
+    
+    def add_transaction(self, transaction):
+        self.all_transaction.append(transaction)                                                            

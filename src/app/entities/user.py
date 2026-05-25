@@ -8,7 +8,6 @@ class User():
     
     Responsible for carrying registration data, current balance, and enforcing
     validation rules for bank agency and account formats.
-    
     """
     name: str
     agency: str
@@ -110,6 +109,7 @@ class User():
         return (True, "") # No errors
     
     def to_dict(self):
+        """Converts the User object instance into a dictionary."""
         return {
             "name": self.name,
             "agency": self.agency,
